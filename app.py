@@ -31,6 +31,36 @@ st.markdown("""
         background-color: #1E293B;
     }
     
+    /* Modern Sidebar Radio Buttons Styling */
+    [data-testid="stSidebar"] .stRadio > label {
+        display: none;
+    }
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] {
+        gap: 6px;
+    }
+    [data-testid="stSidebar"] .stRadio label[data-baseweb="radio"] {
+        background-color: rgba(30, 41, 59, 0.6);
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(71, 85, 105, 0.4);
+        transition: all 0.2s ease-in-out;
+        width: 100%;
+    }
+    [data-testid="stSidebar"] .stRadio label[data-baseweb="radio"]:hover {
+        background-color: rgba(30, 58, 138, 0.4);
+        border-color: #3b82f6;
+    }
+
+    /* Sidebar Metrics Card Polish */
+    [data-testid="stSidebar"] [data-testid="metric-container"] {
+        background-color: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(71, 85, 105, 0.3);
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        border-left: 3px solid #3b82f6;
+    }
+    
     /* Card styling */
     [data-testid="stMetricValue"] {
         font-size: 28px;
