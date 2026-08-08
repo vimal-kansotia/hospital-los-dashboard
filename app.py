@@ -1,6 +1,6 @@
 """
 Hospital Length of Stay Prediction Dashboard
-Main Application Entry Point
+Main Application Entry Point with Pages Folder Support
 """
 
 import streamlit as st
@@ -233,10 +233,10 @@ def main():
     **Data:** 100K+ patient records with clinical vitals, demographics, and comorbidities
     """)
     
-    # Route to selected page
+    # Route to selected page from the pages folder
     page_module = page_options[selected_page]
     
-   if page_module == "overview":
+    if page_module == "overview":
         from pages.overview import show
         show(st.session_state.df)
     
