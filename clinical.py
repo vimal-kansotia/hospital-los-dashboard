@@ -55,33 +55,62 @@ def show(df):
     
     st.divider()
     
-    # Box Plot Analysis
+    # Dynamic Plot Analysis based on user selection
     st.markdown(f"## 📊 {primary_var.title()} by Length of Stay Category")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Create box plot
         fig = go.Figure()
         
         for los_cat in ['1-3 days', '4-6 days', '7-10 days', '11+ days']:
             data = df[df['los_category'] == los_cat][primary_var]
-            fig.add_trace(go.Box(
-                y=data,
-                name=los_cat,
-                boxmean='sd',
-                hovertemplate='<b>%{fullData.name}</b><br>Value: %{y:.2f}<extra></extra>'
-            ))
+            
+            if plot_type == 'Box Plot':
+                fig.add_trace(go.Box(
+                    y=data,
+                    name=los_cat,
+                    boxmean='sd',
+                    hovertemplate='<b>%{fullData.name}</b><br>Value: %{y:.2f}<extra></extra>'
+                ))
+            elif plot_type == 'Violin Plot':
+                fig.add_trace(go.Violin(
+                    y=data,
+                    name=los_cat,
+                    box_visible=True,
+                    meanline_visible=True,
+                    hovertemplate='<b>%{fullData.name}</b><br>Value: %{y:.2f}<extra></extra>'
+                ))
+            else:  # Histogram representation across categories or overall distribution
+                pass
         
-        fig.update_layout(
-            title=f'{primary_var.title()} Distribution by LOS Category',
-            yaxis_title=primary_var.title(),
-            template='plotly_dark',
-            height=450,
-            hovermode='closest'
-        )
+        # Fallback handling for Histogram if user wants a direct distribution view
+        if plot_type == 'Histogram':
+            fig = px.histogram(
+                df, 
+                x=primary_var, 
+                color='los_category', 
+                barmode='group',
+                marginal='rug',
+                color_discrete_sequence=px.colors.qualitative.Bold
+            )
+            fig.update_layout(
+                title=f'{primary_var.title()} Distribution Histogram',
+                xaxis_title=primary_var.title(),
+                yaxis_title='Count',
+                template='plotly_dark',
+                height=450
+            )
+        else:
+            fig.update_layout(
+                title=f'{primary_var.title()} Distribution by LOS Category ({plot_type})',
+                yaxis_title=primary_var.title(),
+                template='plotly_dark',
+                height=450,
+                hovermode='closest'
+            )
         
-        st.plotly_chart(fig, use_container_width=True, key="clinical_box")
+        st.plotly_chart(fig, use_container_width=True, key="clinical_dynamic_plot")
     
     with col2:
         # Statistical summary
@@ -116,9 +145,9 @@ def show(df):
     
     corr_matrix = get_correlation_matrix(df)
     
-    fig = correlation_heatmap(corr_matrix, title='Feature Correlation Matrix')
+    fig_corr = correlation_heatmap(corr_matrix, title='Feature Correlation Matrix')
     
-    st.plotly_chart(fig, use_container_width=True, key="correlation_matrix")
+    st.plotly_chart(fig_corr, use_container_width=True, key="correlation_matrix")
     
     # Correlation insights
     st.markdown("### 💡 Key Correlations with Length of Stay")
@@ -157,10 +186,10 @@ def show(df):
     # Clinical Variable Comparison Table
     st.markdown("## 📋 All Clinical Variables Summary")
     
-    stats = get_clinical_stats(df)
+    stats_all = get_clinical_stats(df)
     summary_data = []
     
-    for var, var_stats in stats.items():
+    for var, var_stats in stats_all.items():
         summary_data.append({
             'Variable': var.title(),
             'Mean': f"{var_stats['mean']:.2f}",
