@@ -180,13 +180,6 @@ def main():
     
     st.sidebar.markdown("---")
     
-    # Dataset info in sidebar
-    st.sidebar.markdown("### 📈 Dataset Info")
-    st.sidebar.metric("Total Patients", f"{len(st.session_state.df):,}")
-    st.sidebar.metric("Total Features", len(st.session_state.df.columns))
-    st.sidebar.metric("Date Range", f"{st.session_state.df['vdate'].min().strftime('%m/%d/%Y')} - {st.session_state.df['vdate'].max().strftime('%m/%d/%Y')}")
-    st.sidebar.metric("Avg LOS", f"{st.session_state.df['lengthofstay'].mean():.2f} days")
-    
     st.sidebar.markdown("---")
     st.sidebar.markdown("### ℹ️ About")
     st.sidebar.markdown("""
