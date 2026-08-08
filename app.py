@@ -1,6 +1,6 @@
 """
 Hospital Length of Stay Prediction Dashboard
-Main Application Entry Point with Native Navigation
+Main Application Entry Point
 """
 
 import streamlit as st
@@ -30,6 +30,26 @@ st.markdown("""
         background-color: #1E293B;
     }
     
+    /* Modern Sidebar Radio Buttons Styling */
+    [data-testid="stSidebar"] .stRadio > label {
+        display: none;
+    }
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] {
+        gap: 6px;
+    }
+    [data-testid="stSidebar"] .stRadio label[data-baseweb="radio"] {
+        background-color: rgba(30, 41, 59, 0.6);
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(71, 85, 105, 0.4);
+        transition: all 0.2s ease-in-out;
+        width: 100%;
+    }
+    [data-testid="stSidebar"] .stRadio label[data-baseweb="radio"]:hover {
+        background-color: rgba(30, 58, 138, 0.4);
+        border-color: #3b82f6;
+    }
+
     /* Sidebar Metrics Card Polish */
     [data-testid="stSidebar"] [data-testid="metric-container"] {
         background-color: rgba(15, 23, 42, 0.6);
@@ -111,31 +131,24 @@ st.markdown("""
 # Load data with caching
 @st.cache_data
 def load_data():
-    """Load and prepare the dataset."""
     from utils_preprocessing import load_and_prepare_data
-    
-    # Try to load from data folder
     if os.path.exists('data/LengthOfStay.csv'):
         df = load_and_prepare_data('data/LengthOfStay.csv')
     else:
         st.error("❌ Dataset not found! Place 'LengthOfStay.csv' in 'data/' folder")
         st.stop()
-    
     return df
 
 # Load model if available
 @st.cache_resource
 def load_model():
-    """Load pre-trained ML model."""
     import joblib
-    
     try:
         if os.path.exists('models/best_model.pkl'):
             model = joblib.load('models/best_model.pkl')
             return model
     except:
         pass
-    
     return None
 
 # Initialize session state
@@ -150,12 +163,10 @@ if 'last_prediction' not in st.session_state:
 
 # Main App
 def main():
-    # Header
     col1, col2, col3 = st.columns([0.2, 0.6, 0.2])
     
     with col1:
         st.markdown("## 🏥")
-    
     with col2:
         st.markdown("""
         <div style='text-align: center;'>
@@ -165,11 +176,33 @@ def main():
             </p>
         </div>
         """, unsafe_allow_html=True)
-    
     with col3:
         st.markdown("## 📊")
     
     st.divider()
+    
+    # Sidebar Navigation
+    st.sidebar.markdown("## 📍 Navigation")
+    st.sidebar.markdown("---")
+    
+    page_options = {
+        "🏠 Overview": "overview",
+        "📊 Patient Analytics": "analytics",
+        "🔬 Clinical Insights": "clinical",
+        "🤖 ML Lab": "ml_lab",
+        "🎯 Predictions": "predictions",
+        "🧠 Explainability": "explainability",
+        "📋 Data Explorer": "explorer",
+        "📚 Research": "research"
+    }
+    
+    selected_page = st.sidebar.radio(
+        "Select a page:",
+        options=list(page_options.keys()),
+        index=0
+    )
+    
+    st.sidebar.markdown("---")
     
     # Dataset info in sidebar
     st.sidebar.markdown("### 📈 Dataset Info")
@@ -189,20 +222,33 @@ def main():
     **Data:** 100K+ patient records with clinical vitals, demographics, and comorbidities
     """)
     
-    # Native Streamlit Multi-page Navigation (reads from 'pages' folder automatically)
-    pages = [
-        st.Page("pages/overview.py", title="Overview", icon="🏠"),
-        st.Page("pages/analytics.py", title="Patient Analytics", icon="📊"),
-        st.Page("pages/clinical.py", title="Clinical Insights", icon="🔬"),
-        st.Page("pages/ml_lab.py", title="ML Lab", icon="🤖"),
-        st.Page("pages/predictions.py", title="Predictions", icon="🎯"),
-        st.Page("pages/explainability.py", title="Explainability", icon="🧠"),
-        st.Page("pages/explorer.py", title="Data Explorer", icon="📋"),
-        st.Page("pages/research.py", title="Research", icon="📚"),
-    ]
-
-    pg = st.navigation(pages)
-    pg.run()
+    # Route to selected page from root folder
+    page_module = page_options[selected_page]
+    
+    if page_module == "overview":
+        from overview import show
+        show(st.session_state.df)
+    elif page_module == "analytics":
+        from analytics import show
+        show(st.session_state.df)
+    elif page_module == "clinical":
+        from clinical import show
+        show(st.session_state.df)
+    elif page_module == "ml_lab":
+        from ml_lab import show
+        show(st.session_state.df, st.session_state.model)
+    elif page_module == "predictions":
+        from predictions import show
+        show(st.session_state.df, st.session_state.model)
+    elif page_module == "explainability":
+        from explainability import show
+        show(st.session_state.df, st.session_state.model)
+    elif page_module == "explorer":
+        from explorer import show
+        show(st.session_state.df)
+    elif page_module == "research":
+        from research import show
+        show(st.session_state.df, st.session_state.model)
 
 if __name__ == "__main__":
     main()
