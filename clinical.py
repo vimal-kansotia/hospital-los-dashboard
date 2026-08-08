@@ -1,6 +1,6 @@
 """
 Page 3: Clinical Insights
-Vitals and correlation analysis with dynamic scatter updates
+Vitals and correlation analysis with direct inline scatter rendering
 """
 
 import streamlit as st
@@ -9,8 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from utils_visualizations import (
     box_plot_clinical_variable,
-    correlation_heatmap,
-    scatter_plot_two_variables
+    correlation_heatmap
 )
 from utils_preprocessing import get_clinical_stats, get_correlation_matrix
 
@@ -164,18 +163,27 @@ def show(df):
     
     st.divider()
     
-    # Scatter Plot Analysis (Dynamically updates with both primary and secondary variable changes)
+    # Direct Inline Scatter Plot (Guaranteed to update instantly with any primary/secondary selection)
     st.markdown(f"## 🔍 {primary_var.title()} vs {secondary_var.title()}")
     
-    scatter_fig = scatter_plot_two_variables(
-        df,
-        primary_var,
-        secondary_var,
-        color_by='lengthofstay',
-        title=f'{primary_var.title()} vs {secondary_var.title()} (colored by LOS)'
+    sample_df = df.sample(min(2000, len(df)))
+    scatter_fig = px.scatter(
+        sample_df,
+        x=primary_var,
+        y=secondary_var,
+        color='lengthofstay',
+        color_continuous_scale='Viridis',
+        opacity=0.7,
+        title=f'{primary_var.title()} vs {secondary_var.title()} (Colored by Length of Stay)'
+    )
+    scatter_fig.update_layout(
+        template='plotly_dark',
+        height=500,
+        xaxis_title=primary_var.title(),
+        yaxis_title=secondary_var.title()
     )
     
-    st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{primary_var}_{secondary_var}")
+    st.plotly_chart(scatter_fig, use_container_width=True, key=f"dynamic_scatter_{primary_var}_{secondary_var}")
     
     st.divider()
     
