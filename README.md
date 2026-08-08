@@ -433,7 +433,7 @@ Contributions welcome! Areas for improvement:
 ## 📧 Contact & Support
 
 **Author:** Vimal Kansotia  
-**Email:** kansotiavimal4@example.com  
+**Email:** kansotiavimal4@gmail.com  
 **GitHub:** https://github.com/vimalkansotia/hospital-los-dashboard  
 
 For issues, please create a GitHub issue or email.
