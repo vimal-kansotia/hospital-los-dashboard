@@ -270,6 +270,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-Give me updated script
