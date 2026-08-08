@@ -195,7 +195,7 @@ def show(df, model):
             (1.0 if bmi > 35 or bmi < 16 else 0.0)
         )
         
-        # Map risk score directly to response categories so inputs change results instantly
+        # Map risk score directly to response categories
         if risk_score < 1.0:
             predicted_class = 0  # 1-3 days
             probabilities = np.array([0.75, 0.18, 0.05, 0.02])
@@ -223,6 +223,7 @@ def show(df, model):
     # Render results if present
     if st.session_state.get('last_prediction') is not None:
         res = st.session_state.last_prediction
+        score_val = res.get('score', 0)
         
         st.divider()
         st.markdown("## 🎯 Prediction Results")
@@ -251,7 +252,7 @@ def show(df, model):
                 <p><b>Model:</b> Random Forest Classifier (Optimized)</p>
                 <p><b>Confidence Level:</b> {res['confidence']*100:.1f}%</p>
                 <p><b>Classification:</b> Multi-class (4 categories)</p>
-                <p><b>Comorbidity Load:</b> {res['score']} conditions flagged</p>
+                <p><b>Comorbidity Load:</b> {score_val} conditions flagged</p>
             </div>
             """, unsafe_allow_html=True)
         
