@@ -434,7 +434,7 @@ Contributions welcome! Areas for improvement:
 
 **Author:** Vimal Kansotia  
 **Email:** kansotiavimal4@gmail.com  
-**GitHub:** https://github.com/vimalkansotia/hospital-los-dashboard  
+**GitHub:** (https://github.com/vimal-kansotia/hospital-length-of-stay-analytics/tree/main)  
 
 For issues, please create a GitHub issue or email.
 
