@@ -207,35 +207,35 @@ def main():
     page_module = page_options[selected_page]
     
     if page_module == "overview":
-        from pages.overview import show
+        from overview import show
         show(st.session_state.df)
     
     elif page_module == "analytics":
-        from pages.analytics import show
+        from analytics import show
         show(st.session_state.df)
     
     elif page_module == "clinical":
-        from pages.clinical import show
+        from clinical import show
         show(st.session_state.df)
     
     elif page_module == "ml_lab":
-        from pages.ml_lab import show
+        from ml_lab import show
         show(st.session_state.df, st.session_state.model)
     
     elif page_module == "predictions":
-        from pages.predictions import show
+        from predictions import show
         show(st.session_state.df, st.session_state.model)
     
     elif page_module == "explainability":
-        from pages.explainability import show
+        from explainability import show
         show(st.session_state.df, st.session_state.model)
     
     elif page_module == "explorer":
-        from pages.explorer import show
+        from explorer import show
         show(st.session_state.df)
     
     elif page_module == "research":
-        from pages.research import show
+        from research import show
         show(st.session_state.df, st.session_state.model)
 
 if __name__ == "__main__":
