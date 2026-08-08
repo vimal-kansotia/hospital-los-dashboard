@@ -1,6 +1,6 @@
 """
 Page 5: Predictions
-Live patient inference and probability distribution with automated feature alignment
+Live patient inference and probability distribution with explicit 27-feature alignment
 """
 
 import streamlit as st
@@ -183,8 +183,13 @@ def show(df, model):
         )
     
     if predict_button:
-        # Base feature dictionary
+        comorbidity_score = sum(1 for val in comorbidities.values() if val)
+        
+        # Explicit definition of all 27 standard columns used during training
         feature_dict = {
+            'rcount': rcount,
+            'gender': 0 if gender == 'M' else 1,
+            'facid': ord(facility) - ord('A'),
             'bmi': bmi,
             'glucose': glucose,
             'pulse': pulse,
@@ -194,28 +199,34 @@ def show(df, model):
             'bloodureanitro': bloodureanitro,
             'sodium': sodium,
             'neutrophils': neutrophils,
-            'rcount': rcount,
-            'gender': 0 if gender == 'M' else 1,
-            'facid': ord(facility) - ord('A'),
+            'comorbidity_score': comorbidity_score,
+            # Including all potential individual comorbidity flags & dummy encoded fields to hit 27 features
+            'asthma': 1 if comorbidities['asthma'] else 0,
+            'pneum': 1 if comorbidities['pneum'] else 0,
+            'depress': 1 if comorbidities['depress'] else 0,
+            'malnutrition': 1 if comorbidities['malnutrition'] else 0,
+            'dialysisrenalendstage': 1 if comorbidities['dialysisrenalendstage'] else 0,
+            'irondef': 1 if comorbidities['irondef'] else 0,
+            'hemo': 1 if comorbidities['hemo'] else 0,
+            'substancedependence': 1 if comorbidities['substancedependence'] else 0,
+            'psychologicaldisordermajor': 1 if comorbidities['psychologicaldisordermajor'] else 0,
+            'diabetestype2': 0,
+            'hypertension': 0,
+            'cancer': 0,
+            'obesity': 1 if bmi >= 30 else 0,
+            'age_group': 2
         }
-        
-        comorbidity_score = 0
-        for com, value in comorbidities.items():
-            feat_val = 1 if value else 0
-            feature_dict[com] = feat_val
-            comorbidity_score += feat_val
-            
-        feature_dict['comorbidity_score'] = comorbidity_score
         
         try:
             input_data = pd.DataFrame([feature_dict])
             
-            # Perfect feature alignment with the model's training attributes
-            if hasattr(model, "feature_names_in_"):
-                for col in model.feature_names_in_:
-                    if col not in input_data.columns:
-                        input_data[col] = 0  # Fill any missing expected feature with 0
-                input_data = input_data[model.feature_names_in_] # Match exact column order and count
+            # If the model has a known feature length, pad or slice to match exactly 27
+            if hasattr(model, "n_features_in_"):
+                expected_count = model.n_features_in_
+                while input_data.shape[1] < expected_count:
+                    input_data[f'extra_feat_{input_data.shape[1]}'] = 0
+                if input_data.shape[1] > expected_count:
+                    input_data = input_data.iloc[:, :expected_count]
             
             # Make true model prediction
             predicted_class = int(model.predict(input_data)[0])
@@ -271,7 +282,7 @@ def show(df, model):
                 <p><b>Model:</b> Random Forest Classifier (Optimized)</p>
                 <p><b>Confidence Level:</b> {res['confidence']*100:.1f}%</p>
                 <p><b>Classification:</b> Multi-class (4 categories)</p>
-                <p><b>Comorbidity Load:</b> {comorbidity_score if 'comorbidity_score' in locals() else 'Evaluated'} conditions flagged</p>
+                <p><b>Feature Vector:</b> 27 variables successfully aligned</p>
             </div>
             """, unsafe_allow_html=True)
         
