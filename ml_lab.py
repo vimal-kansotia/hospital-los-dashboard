@@ -1,6 +1,6 @@
 """
 Page 4: ML Lab
-Model comparison and performance evaluation with fully dynamic interactive model selection
+Model comparison and performance evaluation with interactive radio selection
 """
 
 import streamlit as st
@@ -14,29 +14,15 @@ def show(df, model):
     st.markdown("*Model training, evaluation, and performance analysis*")
     st.divider()
     
-    # Initialize session state for selected model if not already set
-    if 'selected_ml_model' not in st.session_state:
-        st.session_state.selected_ml_model = "Random Forest"
-
-    # Model Selection Controls
+    # Model Selection using a native state-preserving radio element
     st.markdown("## 📊 Model Selection")
     
-    model_col1, model_col2, model_col3, model_col4 = st.columns(4)
-    
-    with model_col1:
-        if st.button("🏆 Random Forest", key="rf_btn", use_container_width=True):
-            st.session_state.selected_ml_model = "Random Forest"
-    with model_col2:
-        if st.button("⚡ XGBoost", key="xgb_btn", use_container_width=True):
-            st.session_state.selected_ml_model = "XGBoost"
-    with model_col3:
-        if st.button("🚀 LightGBM", key="lgb_btn", use_container_width=True):
-            st.session_state.selected_ml_model = "LightGBM"
-    with model_col4:
-        if st.button("📈 Logistic Regression", key="lr_btn", use_container_width=True):
-            st.session_state.selected_ml_model = "Logistic Regression"
-            
-    current_model = st.session_state.selected_ml_model
+    current_model = st.radio(
+        "Choose Model to Evaluate:",
+        options=["Random Forest", "XGBoost", "LightGBM", "Logistic Regression"],
+        horizontal=True,
+        key="ml_model_radio_selector"
+    )
     
     st.divider()
     
