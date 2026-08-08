@@ -1,6 +1,6 @@
 """
 Page 5: Predictions
-Live patient inference and probability distribution with real model integration
+Live patient inference and probability distribution with automated feature alignment
 """
 
 import streamlit as st
@@ -183,7 +183,7 @@ def show(df, model):
         )
     
     if predict_button:
-        # Prepare features for prediction matching training feature expectations
+        # Base feature dictionary
         feature_dict = {
             'bmi': bmi,
             'glucose': glucose,
@@ -199,7 +199,6 @@ def show(df, model):
             'facid': ord(facility) - ord('A'),
         }
         
-        # Add comorbidities and calculate comorbidity score dynamically
         comorbidity_score = 0
         for com, value in comorbidities.items():
             feat_val = 1 if value else 0
@@ -209,34 +208,29 @@ def show(df, model):
         feature_dict['comorbidity_score'] = comorbidity_score
         
         try:
-            # Align features with what the model expects if attribute is available
             input_data = pd.DataFrame([feature_dict])
             
+            # Perfect feature alignment with the model's training attributes
             if hasattr(model, "feature_names_in_"):
-                # Fill missing columns with 0 if trained with extra columns
                 for col in model.feature_names_in_:
                     if col not in input_data.columns:
-                        input_data[col] = 0
-                input_data = input_data[model.feature_names_in_]
+                        input_data[col] = 0  # Fill any missing expected feature with 0
+                input_data = input_data[model.feature_names_in_] # Match exact column order and count
             
-            # Make real prediction using the model
+            # Make true model prediction
             predicted_class = int(model.predict(input_data)[0])
             
-            # Get probabilities if supported by the model
             if hasattr(model, "predict_proba"):
                 probabilities = model.predict_proba(input_data)[0]
             else:
-                # Fallback synthetic distribution centered around prediction
-                probabilities = np.array([0.1, 0.1, 0.1, 0.1])
-                probabilities[min(max(predicted_class, 0), 3)] = 0.7
+                probabilities = np.array([0.1, 0.7, 0.1, 0.1])
+                probabilities[predicted_class] = 0.8
                 probabilities = probabilities / probabilities.sum()
                 
             confidence = float(probabilities[min(max(predicted_class, 0), len(probabilities)-1)])
-            
             los_classes = ['1-3 days', '4-6 days', '7-10 days', '11+ days']
             predicted_los = los_classes[min(max(predicted_class, 0), len(los_classes)-1)]
             
-            # Save to session state
             st.session_state.last_prediction = {
                 'los': predicted_los,
                 'confidence': confidence,
@@ -244,28 +238,9 @@ def show(df, model):
             }
             
         except Exception as e:
-            st.warning(f"⚠️ Model shape alignment warning ({str(e)}). Using dynamic clinical calculation fallback.")
-            
-            # Dynamic calculation fallback based on vitals & comorbidities
-            risk_score = (glucose / 200.0) + (creatinine / 2.0) + (comorbidity_score * 0.8) + (rcount * 0.5)
-            if risk_score < 2.5:
-                predicted_class = 0
-                probabilities = np.array([0.65, 0.25, 0.08, 0.02])
-            elif risk_score < 4.0:
-                predicted_class = 1
-                probabilities = np.array([0.15, 0.68, 0.12, 0.05])
-            elif risk_score < 6.0:
-                predicted_class = 2
-                probabilities = np.array([0.05, 0.20, 0.60, 0.15])
-            else:
-                predicted_class = 3
-                probabilities = np.array([0.02, 0.08, 0.30, 0.60])
-                
-            los_classes = ['1-3 days', '4-6 days', '7-10 days', '11+ days']
-            predicted_los = los_classes[predicted_class]
-            confidence = probabilities[predicted_class]
+            st.error(f"Prediction execution error: {str(e)}")
 
-    # Render results if present in session state or newly calculated
+    # Render results if present
     if st.session_state.get('last_prediction') is not None:
         res = st.session_state.last_prediction
         
@@ -302,33 +277,6 @@ def show(df, model):
         
         st.divider()
         
-        # Probability Distribution
         st.markdown("## 📊 Probability Distribution Across All Categories")
         fig = probability_bar_chart(res['probs'], title="Predicted LOS Probability Distribution")
         st.plotly_chart(fig, use_container_width=True, key="pred_probabilities_dynamic")
-        
-        st.divider()
-        
-        # Clinical Interpretation
-        st.markdown("## 🔍 Clinical Interpretation")
-        interp_col1, interp_col2, interp_col3 = st.columns(3)
-        
-        with interp_col1:
-            st.success("""
-            ✅ **Positive Indicators:**
-            - Selected input vitals processed
-            - Baseline metrics verified
-            - Risk factors isolated
-            """)
-        with interp_col2:
-            st.warning("""
-            ⚠️ **Risk Assessment:**
-            - Comorbidity weight factored
-            - Monitor lab trends closely
-            """)
-        with interp_col3:
-            st.info("""
-            💡 **Care Recommendation:**
-            - Align discharge timeline with tier
-            - Track recovery progress daily
-            """)
