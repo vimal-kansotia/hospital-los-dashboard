@@ -6,6 +6,7 @@ Interactive exploratory data analysis with dynamic filtering
 import streamlit as st
 import pandas as pd
 import numpy as np
+import io
 from utils_visualizations import (
     gender_donut_chart,
     donut_chart_facility_distribution,
@@ -238,8 +239,13 @@ def show(df):
         )
     
     with export_col2:
-        xlsx_buffer = pd.ExcelWriter(None, engine='xlsxwriter')
-        df_filtered.to_excel(xlsx_buffer, index=False, sheet_name='Patients')
+        excel_buffer = io.BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+            df_filtered.to_excel(writer, index=False, sheet_name='Patients')
         
-        # Note: Simplified for Streamlit - actual export would need BytesIO
-        st.info("💡 Use CSV export above for data analysis")
+        st.download_button(
+            label="📊 Download as Excel",
+            data=excel_buffer.getvalue(),
+            file_name="filtered_patient_data.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
