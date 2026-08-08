@@ -1,6 +1,6 @@
 """
 Page 3: Clinical Insights
-Vitals and correlation analysis
+Vitals and correlation analysis with dynamic scatter updates
 """
 
 import streamlit as st
@@ -81,10 +81,9 @@ def show(df):
                     meanline_visible=True,
                     hovertemplate='<b>%{fullData.name}</b><br>Value: %{y:.2f}<extra></extra>'
                 ))
-            else:  # Histogram representation across categories or overall distribution
+            else:
                 pass
         
-        # Fallback handling for Histogram if user wants a direct distribution view
         if plot_type == 'Histogram':
             fig = px.histogram(
                 df, 
@@ -144,14 +143,11 @@ def show(df):
     st.markdown("## 🔗 Correlation Matrix")
     
     corr_matrix = get_correlation_matrix(df)
-    
     fig_corr = correlation_heatmap(corr_matrix, title='Feature Correlation Matrix')
-    
     st.plotly_chart(fig_corr, use_container_width=True, key="correlation_matrix")
     
     # Correlation insights
     st.markdown("### 💡 Key Correlations with Length of Stay")
-    
     los_corr = corr_matrix['lengthofstay'].sort_values(ascending=False)
     
     insight_col1, insight_col2 = st.columns(2)
@@ -168,7 +164,7 @@ def show(df):
     
     st.divider()
     
-    # Scatter Plot Analysis
+    # Scatter Plot Analysis (Dynamically updates with both primary and secondary variable changes)
     st.markdown(f"## 🔍 {primary_var.title()} vs {secondary_var.title()}")
     
     scatter_fig = scatter_plot_two_variables(
@@ -179,7 +175,7 @@ def show(df):
         title=f'{primary_var.title()} vs {secondary_var.title()} (colored by LOS)'
     )
     
-    st.plotly_chart(scatter_fig, use_container_width=True, key="scatter_clinical")
+    st.plotly_chart(scatter_fig, use_container_width=True, key=f"scatter_{primary_var}_{secondary_var}")
     
     st.divider()
     
