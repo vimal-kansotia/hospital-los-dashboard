@@ -98,7 +98,7 @@ This dashboard predicts hospital length of stay (LOS) using a Random Forest mach
 ## 📁 Project Structure
 
 ```
-hospital-los-dashboard/
+hospital-length-of-stay-analytics/
 │
 ├── 📄 app.py                           # Main Streamlit app
 │
@@ -407,7 +407,7 @@ This dashboard is suitable for:
 ```
 Vimal Kansotia. "Hospital Length of Stay Prediction Dashboard." 
 Master's Thesis, St. Xavier's College Mumbai, 2024.
-https://github.com/vimalkansotia/hospital-los-dashboard
+(https://github.com/vimal-kansotia/hospital-length-of-stay-analytics/tree/main)
 ```
 
 ---
